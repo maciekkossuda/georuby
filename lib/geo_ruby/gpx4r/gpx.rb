@@ -128,7 +128,7 @@ module GeoRuby
       def self.metadata_to_xml(metadata, xml)
         xml.metadata {
           xml.name { xml.text(metadata.delete(:name)) } unless metadata[:name].nil?
-          xml.desc { xml.text(metadata.delete(:delete)) } unless metadata[:desc].nil?
+          xml.desc { xml.text(metadata.delete(:desc)) } unless metadata[:desc].nil?
           xml.author { xml.text(metadata.delete(:author)) } unless metadata[:author].nil?
           xml.link { xml.text(metadata.delete(:link)) } unless metadata[:link].nil?
           xml.keywords { xml.text(metadata.delete(:keywords)) } unless metadata[:keywords].nil?
