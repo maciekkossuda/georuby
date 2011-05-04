@@ -15,11 +15,15 @@ module GeoRuby#:nodoc:
       #Flag indicating if the m ordinate of the geometry is meaningful
       attr_accessor :with_m
       alias :with_m? :with_m
+      
+      #Reference to parent object (eq. p = Waypoint.geom, p is instance of GeoRuby::SimpleFeatures::Point, p.ref => Waypoint)
+      attr_accessor :ref
 
-      def initialize(srid=DEFAULT_SRID,with_z=false,with_m=false)
+      def initialize(srid=DEFAULT_SRID,with_z=false,with_m=false,ref=nil)
         @srid=srid
         @with_z=with_z
         @with_m=with_m
+        @ref=ref
       end
 
       def srid=(new_srid)
