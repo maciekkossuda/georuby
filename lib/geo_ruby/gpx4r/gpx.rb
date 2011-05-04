@@ -131,18 +131,22 @@ module GeoRuby
           xml.desc { xml.text(metadata.delete(:delete)) } unless metadata[:desc].nil?
           xml.author { xml.text(metadata.delete(:author)) } unless metadata[:author].nil?
           xml.link { xml.text(metadata.delete(:link)) } unless metadata[:link].nil?
-          xml.time { xml.text(metadata.delete(:time)) } unless metadata[:time].nil?
           xml.keywords { xml.text(metadata.delete(:keywords)) } unless metadata[:keywords].nil?
           xml.bounds { xml.text(metadata.delete(:bounds)) } unless metadata[:bounds].nil?
         }
       end
   
       def self.points_to_xml(points, xml, opts = {})
-        tag = opts.delete(:tag) || 'wpt'
+        tag     = opts.delete(:tag) || 'wpt'
+        parent  = opts.delete(:parent) || nil
+        
+        with_z = parent.nil? ? true : parent.with_z?
+        with_m = parent.nil? ? true : parent.with_m?
+        
         points.each do |p|
           xml.send(tag, :lat => p.y, :lon => p.x) {
-            xml.ele { xml.text(p.z) } if p.with_z?
-            xml.time { xml.text(p.m) } if p.with_m?
+            xml.ele { xml.text(p.z) } if with_z && p.with_z?
+            # xml.time { xml.text(p.m) } if with_m && p.with_m?
             xml.name { xml.text(p.ref.name) } unless p.ref.nil? || p.ref.name.nil?
             xml.desc { xml.text(p.ref.desc) } unless p.ref.nil? || p.ref.desc.nil?
           }
@@ -155,7 +159,7 @@ module GeoRuby
             xml.name { xml.text(t.ref.name) } unless t.ref.nil? || t.ref.name.nil?
             xml.desc { xml.text(t.ref.desc) } unless t.ref.nil? || t.ref.desc.nil?
             xml.trkseg {
-              points_to_xml(t.points, xml, { :tag => 'trkpt' })
+              points_to_xml(t.points, xml, { :tag => 'trkpt', :parent => t })
             }
           }
         end
