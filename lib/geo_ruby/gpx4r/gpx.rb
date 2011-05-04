@@ -36,6 +36,23 @@ module GeoRuby
           gpxfile
         end
       end
+      
+      def self.write(attrs = {}, gpx_opts = {}, xml_opts = {}, as_string = false)
+        points        = attrs.delete(:points)
+        line_strings  = attrs.delete(:line_strings)
+        # polygons      = attrs.delete(:polygons)
+        metadata      = attrs.delete(:metadata)
+        
+        builder = Nokogiri::XML::Builder.new(xml_opts) do |xml|
+          xml.gpx(gpx_opts) {
+            metadata_to_xml(metadata, xml) unless metadata.nil?
+            points_to_xml(points, xml) unless points.nil?
+            line_strings_to_xml(line_strings, xml) unless line_strings.nil?
+          }
+        end
+        
+        as_string ? builder.to_xml : builder.doc.write_xml_to
+      end
 
       #Closes a gpxfile
       def close
@@ -106,6 +123,42 @@ module GeoRuby
       rescue => e
         raise MalformedGpxException.new("Bad GPX. Error: #{e}")
         # trackpoint.at("gpxdata:hr").nil? # heartrate
+      end
+      
+      def self.metadata_to_xml(metadata, xml)
+        xml.metadata {
+          xml.name { xml.text(metadata.delete(:name)) } unless metadata[:name].nil?
+          xml.desc { xml.text(metadata.delete(:delete)) } unless metadata[:desc].nil?
+          xml.author { xml.text(metadata.delete(:author)) } unless metadata[:author].nil?
+          xml.link { xml.text(metadata.delete(:link)) } unless metadata[:link].nil?
+          xml.time { xml.text(metadata.delete(:time)) } unless metadata[:time].nil?
+          xml.keywords { xml.text(metadata.delete(:keywords)) } unless metadata[:keywords].nil?
+          xml.bounds { xml.text(metadata.delete(:bounds)) } unless metadata[:bounds].nil?
+        }
+      end
+  
+      def self.points_to_xml(points, xml, opts = {})
+        tag = opts.delete(:tag) || 'wpt'
+        points.each do |p|
+          xml.send(tag, :lat => p.y, :lon => p.x) {
+            xml.ele { xml.text(p.z) } if p.with_z?
+            xml.time { xml.text(p.m) } if p.with_m?
+            xml.name { xml.text(p.ref.name) } unless p.ref.nil? || p.ref.name.nil?
+            xml.desc { xml.text(p.ref.desc) } unless p.ref.nil? || p.ref.desc.nil?
+          }
+        end
+      end
+      
+      def self.line_strings_to_xml(line_strings, xml)
+        line_strings.each do |t|
+          xml.trk {
+            xml.name { xml.text(t.ref.name) } unless t.ref.nil? || t.ref.name.nil?
+            xml.desc { xml.text(t.ref.desc) } unless t.ref.nil? || t.ref.desc.nil?
+            xml.trkseg {
+              points_to_xml(t.points, xml, { :tag => 'trkpt' })
+            }
+          }
+        end
       end
 
     end
