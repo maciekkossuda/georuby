@@ -37,7 +37,7 @@ module GeoRuby
         end
       end
       
-      def self.write(attrs = {}, gpx_opts = {}, xml_opts = {}, as_string = false)
+      def self.write(attrs = {}, gpx_opts = {}, xml_opts = {})
         points        = attrs.delete(:points)
         line_strings  = attrs.delete(:line_strings)
         # polygons      = attrs.delete(:polygons)
@@ -51,7 +51,7 @@ module GeoRuby
           }
         end
         
-        as_string ? builder.to_xml : builder.doc.write_xml_to
+        builder
       end
 
       #Closes a gpxfile
