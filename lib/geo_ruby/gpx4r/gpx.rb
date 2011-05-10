@@ -129,7 +129,10 @@ module GeoRuby
         xml.metadata {
           xml.name { xml.text(metadata.delete(:name)) } unless metadata[:name].nil?
           xml.desc { xml.text(metadata.delete(:desc)) } unless metadata[:desc].nil?
-          xml.author { xml.text(metadata.delete(:author)) } unless metadata[:author].nil?
+          xml.author { 
+            xml.name { xml.text(metadata[:author][:name]) } unless metadata[:author][:name].nil?
+            xml.link(:href => metadata[:author][:link]) unless metadata[:author][:link].nil?
+          } unless metadata[:author].nil?
           xml.link { xml.text(metadata.delete(:link)) } unless metadata[:link].nil?
           xml.keywords { xml.text(metadata.delete(:keywords)) } unless metadata[:keywords].nil?
           xml.bounds { xml.text(metadata.delete(:bounds)) } unless metadata[:bounds].nil?
